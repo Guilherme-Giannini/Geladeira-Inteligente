@@ -35,3 +35,32 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+
+# Uploads temporários
+uploads/
+
+# MacOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Expo / React Native
+.expo/
+web-build/
+*.expo.js
+
+# Build outputs
+build/
+dist/
