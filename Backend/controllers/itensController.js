@@ -2,7 +2,7 @@ const db = require('../models/db'); // certifique-se que é o db correto
 const Items = require('../models/itemsModel');
 
 const ItemsController = {
-  // Listar todos os itens
+
   list: async (req, res) => {
     try {
       const items = await Items.getAll();
@@ -13,7 +13,7 @@ const ItemsController = {
     }
   },
 
-  // Adicionar novo item
+
   add: async (req, res) => {
     try {
       const { user_id, name, quantity } = req.body;
@@ -25,7 +25,7 @@ const ItemsController = {
     }
   },
 
-  // Atualizar item existente
+
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -47,7 +47,7 @@ const ItemsController = {
     }
   },
 
-  // Deletar item
+
   delete: async (req, res) => {
     try {
       const { id } = req.params;

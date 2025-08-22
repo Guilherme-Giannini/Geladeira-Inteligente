@@ -8,7 +8,7 @@ fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOADS_DIR),
   filename: (req, file, cb) => {
-    // Nome seguro: timestamp + rand + extensão original
+   
     const ts = Date.now();
     const rand = Math.random().toString(36).slice(2, 8);
     const safeOriginal = (file.originalname || 'image')

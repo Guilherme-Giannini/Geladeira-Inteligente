@@ -8,20 +8,21 @@ const scanRoutes = require('./routes/scanRoutes');
 
 const app = express();
 
+
+
 app.use(cors());
 app.use(express.json());
-
-// Garante que a pasta uploads existe
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const uploadsDir = path.join(__dirname, 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
 
-// servir arquivos enviados — útil para debug / visualizar imagens
+
 app.use('/uploads', express.static(uploadsDir, { dotfiles: 'ignore' }));
 
 app.use('/items', itemsRoutes);
 app.use(scanRoutes);
 
-// Middleware de erro (captura erros do multer e gerais)
+
 app.use((err, req, res, next) => {
   if (err?.name === 'MulterError') {
     if (err.code === 'LIMIT_FILE_SIZE') {
