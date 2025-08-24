@@ -123,30 +123,12 @@ Abra Pull Request.
 Integração com IA
 A integração com IA de visão computacional já está funcional.
 
-Como funciona:
-
-Upload de imagem: usuário tira foto do item pelo app React Native.
-
-Processamento por IA: o backend envia a imagem para o modelo de IA, que identifica automaticamente os itens e quantidades.
-
-Atualização do banco: o backend cria ou atualiza os itens no MySQL, preenchendo nome, quantidade e alertas de estoque baixo.
-
-Benefícios:
-
-Reconhecimento automático de alimentos.
-
-Atualização do inventário sem digitação manual.
-
-Alertas automáticos de estoque baixo.
-
-Base para futuras funcionalidades como lista de compras inteligente ou sugestões de receitas.
-
 IoT com Câmera Inteligente (Futuro)
 O sistema poderá ser integrado a dispositivos IoT, como câmeras dentro da geladeira, permitindo:
 
 Atualização automática do inventário em tempo real.
 
-Notificações sobre produtos acabando ou próximos do vencimento.
+Notificações sobre produtos acabando.
 
 Sugestões personalizadas de consumo baseado nos itens disponíveis.
 
