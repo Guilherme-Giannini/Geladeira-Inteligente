@@ -1,4 +1,4 @@
-const db = require('../models/db'); // certifique-se que é o db correto
+const db = require('../models/db'); 
 const Items = require('../models/itemsModel');
 
 const ItemsController = {
@@ -13,7 +13,6 @@ const ItemsController = {
     }
   },
 
-
   add: async (req, res) => {
     try {
       const { user_id, name, quantity } = req.body;
@@ -25,6 +24,48 @@ const ItemsController = {
     }
   },
 
+  addFromPhoto: async (req, res) => {
+    try {
+      const { user_id, items } = req.body; // items = [{ name, quantity }, ...]
+      if (!Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ message: 'Nenhum item fornecido.' });
+      }
+
+   
+      const [[last]] = await db.query("SELECT MAX(photo_id) as max FROM items");
+      const newPhotoId = (last.max || 0) + 1;
+
+      for (const item of items) {
+        await db.query(
+          "INSERT INTO items (user_id, name, quantity, photo_id) VALUES (?, ?, ?, ?)",
+          [user_id, item.name, item.quantity, newPhotoId]
+        );
+      }
+
+      res.json({ message: 'Itens adicionados da foto', photo_id: newPhotoId });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erro ao adicionar itens da foto.' });
+    }
+  },
+
+
+  getLastItems: async (req, res) => {
+    try {
+      const [[last]] = await db.query("SELECT MAX(photo_id) as max FROM items");
+      if (!last.max) return res.json([]);
+
+      const [rows] = await db.query(
+        "SELECT * FROM items WHERE photo_id = ?",
+        [last.max]
+      );
+
+      res.json(rows);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erro ao buscar últimos itens.' });
+    }
+  },
 
   update: async (req, res) => {
     try {
@@ -46,7 +87,6 @@ const ItemsController = {
       res.status(500).json({ message: 'Erro ao atualizar item.' });
     }
   },
-
 
   delete: async (req, res) => {
     try {
