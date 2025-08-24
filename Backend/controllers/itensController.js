@@ -1,4 +1,3 @@
-const db = require('../models/db'); 
 const Items = require('../models/itemsModel');
 
 const ItemsController = {
@@ -13,10 +12,11 @@ const ItemsController = {
     }
   },
 
+ 
   add: async (req, res) => {
     try {
-      const { user_id, name, quantity } = req.body;
-      const result = await Items.create(user_id, name, quantity);
+      const { user_id, name, quantity, min_quantity } = req.body;
+      const result = await Items.create(user_id, name, quantity, min_quantity || 0);
       res.json({ message: 'Item adicionado', id: result.insertId });
     } catch (error) {
       console.error(error);
@@ -24,25 +24,20 @@ const ItemsController = {
     }
   },
 
+  
   addFromPhoto: async (req, res) => {
     try {
-      const { user_id, items } = req.body; // items = [{ name, quantity }, ...]
+      const { user_id, items } = req.body;
       if (!Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ message: 'Nenhum item fornecido.' });
       }
 
-   
-      const [[last]] = await db.query("SELECT MAX(photo_id) as max FROM items");
-      const newPhotoId = (last.max || 0) + 1;
+      const newPhotoId = await Items.addFromPhoto(user_id, items);
 
-      for (const item of items) {
-        await db.query(
-          "INSERT INTO items (user_id, name, quantity, photo_id) VALUES (?, ?, ?, ?)",
-          [user_id, item.name, item.quantity, newPhotoId]
-        );
-      }
-
-      res.json({ message: 'Itens adicionados da foto', photo_id: newPhotoId });
+      res.json({
+        message: 'Itens adicionados da foto',
+        photo_id: newPhotoId,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao adicionar itens da foto.' });
@@ -52,14 +47,7 @@ const ItemsController = {
 
   getLastItems: async (req, res) => {
     try {
-      const [[last]] = await db.query("SELECT MAX(photo_id) as max FROM items");
-      if (!last.max) return res.json([]);
-
-      const [rows] = await db.query(
-        "SELECT * FROM items WHERE photo_id = ?",
-        [last.max]
-      );
-
+      const rows = await Items.getLast();
       res.json(rows);
     } catch (error) {
       console.error(error);
@@ -67,15 +55,30 @@ const ItemsController = {
     }
   },
 
+ 
+  updateMin: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { min_quantity } = req.body;
+      const result = await Items.updateMinQuantity(id, min_quantity);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Item não encontrado.' });
+      }
+
+      res.json({ message: 'Quantidade mínima atualizada com sucesso.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erro ao atualizar quantidade mínima.' });
+    }
+  },
+
+
   update: async (req, res) => {
     try {
       const { id } = req.params;
       const { name, quantity } = req.body;
-
-      const [result] = await db.query(
-        'UPDATE items SET name = ?, quantity = ? WHERE id = ?',
-        [name, quantity, id]
-      );
+      const result = await Items.update(id, name, quantity);
 
       if (result.affectedRows === 0) {
         return res.status(404).json({ message: 'Item não encontrado.' });
@@ -88,11 +91,11 @@ const ItemsController = {
     }
   },
 
+
   delete: async (req, res) => {
     try {
       const { id } = req.params;
-
-      const [result] = await db.query('DELETE FROM items WHERE id = ?', [id]);
+      const result = await Items.delete(id);
 
       if (result.affectedRows === 0) {
         return res.status(404).json({ message: 'Item não encontrado.' });
@@ -102,6 +105,17 @@ const ItemsController = {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao remover item.' });
+    }
+  },
+
+
+  getToBuy: async (req, res) => {
+    try {
+      const items = await Items.getToBuy();
+      res.json(items);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erro ao listar itens para compra.' });
     }
   }
 };

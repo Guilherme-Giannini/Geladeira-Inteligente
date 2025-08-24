@@ -14,7 +14,7 @@ exports.receiveScan = async (req, res, next) => {
       return res.status(500).json({ error: 'Chave da API da Clarifai não configurada.' });
     }
 
- 
+
     const imagePath = req.file.path;
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' });
 
@@ -23,6 +23,7 @@ exports.receiveScan = async (req, res, next) => {
       if (err) console.error('Erro ao apagar o arquivo temporário:', err);
     });
 
+ 
     const stub = ClarifaiStub.grpc();
     const metadata = new grpc.Metadata();
     metadata.set('authorization', `Key ${clarifaiApiKey}`);
@@ -71,17 +72,23 @@ exports.receiveScan = async (req, res, next) => {
       quantity: counts[key]
     }));
 
-
     const userId = req.body?.user_id ?? null;
 
-    for (const item of results) {
-      await ItemsModel.create(userId, item.name, item.quantity);
-    }
+    if (results.length > 0) {
 
-    return res.status(200).json({
-      message: 'Alimentos detectados e salvos com sucesso!',
-      results: results
-    });
+      const newPhotoId = await ItemsModel.addFromPhoto(userId, results);
+
+      return res.status(200).json({
+        message: 'Alimentos detectados e salvos com sucesso!',
+        photo_id: newPhotoId,
+        results: results
+      });
+    } else {
+      return res.status(200).json({
+        message: 'Nenhum alimento detectado.',
+        results: []
+      });
+    }
 
   } catch (err) {
     console.error('Erro no processamento da imagem:', err);
